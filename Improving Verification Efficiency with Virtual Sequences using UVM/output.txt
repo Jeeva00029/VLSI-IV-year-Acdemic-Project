@@ -1,0 +1,201 @@
+VSIMSA: Configuration file changed: `/home/runner/library.cfg'
+ALIB: Library "work" attached.
+work = /home/runner/work/work.lib
+MESSAGE_SP VCP2124 "Package uvm_pkg found in library uvm_1_2."
+MESSAGE "Unit top modules: top."
+SUCCESS "Compile success 0 Errors 0 Warnings  Analysis time: 6[s]."
+done
+# Aldec, Inc. Riviera-PRO version 2023.04.112.8911 built for Linux64 on May 12, 2023.
+# HDL, SystemC, and Assertions simulator, debugger, and design environment.
+# (c) 1999-2023 Aldec, Inc. All rights reserved.
+# ELBREAD: Elaboration process.
+# ELBREAD: Warning: ELBREAD_0049 Package 'uvm_pkg' does not have a `timescale directive, but previous modules do.
+# ELBREAD: Elaboration time 0.4 [s].
+# KERNEL: Main thread initiated.
+# KERNEL: Kernel process initialization phase.
+# ELAB2: Elaboration final pass...
+# KERNEL: PLI/VHPI kernel's engine initialization done.
+# PLI: Loading library '/usr/share/Riviera-PRO/bin/libsystf.so'
+# ELAB2: Create instances ...
+# KERNEL: Info: Loading library:  /usr/share/Riviera-PRO/bin/uvm_1_2_dpi
+# KERNEL: Time resolution set to 1ns.
+# ELAB2: Create instances complete.
+# SLP: Started
+# SLP: Elaboration phase ...
+# SLP: Elaboration phase ... done : 0.0 [s]
+# SLP: Generation phase ...
+# SLP: Generation phase ... done : 0.0 [s]
+# SLP: Finished : 0.1 [s]
+# SLP: 0 primitives and 7 (53.85%) other processes in SLP
+# SLP: 25 (0.08%) signals in SLP and 26 (0.08%) interface signals
+# ELAB2: Elaboration final pass complete - time: 1.8 [s].
+# KERNEL: SLP loading done - time: 0.0 [s].
+# KERNEL: Warning: You are using the Riviera-PRO EDU Edition. The performance of simulation is reduced.
+# KERNEL: Warning: Contact Aldec for available upgrade options - sales@aldec.com.
+# KERNEL: SLP simulation initialization done - time: 0.0 [s].
+# KERNEL: Kernel process initialization done.
+# Allocation: Simulator allocated 30401 kB (elbread=2151 elab2=23117 kernel=5132 sdf=0)
+# KERNEL: UVM_INFO /home/build/vlib1/vlib/uvm-1.2/src/base/uvm_root.svh(392) @ 0: reporter [UVM/RELNOTES] 
+# KERNEL: ----------------------------------------------------------------
+# KERNEL: UVM-1.2
+# KERNEL: (C) 2007-2014 Mentor Graphics Corporation
+# KERNEL: (C) 2007-2014 Cadence Design Systems, Inc.
+# KERNEL: (C) 2006-2014 Synopsys, Inc.
+# KERNEL: (C) 2011-2013 Cypress Semiconductor Corp.
+# KERNEL: (C) 2013-2014 NVIDIA Corporation
+# KERNEL: ----------------------------------------------------------------
+# KERNEL: 
+# KERNEL:   ***********       IMPORTANT RELEASE NOTES         ************
+# KERNEL: 
+# KERNEL:   You are using a version of the UVM library that has been compiled
+# KERNEL:   with `UVM_NO_DEPRECATED undefined.
+# KERNEL:   See http://www.eda.org/svdb/view.php?id=3313 for more details.
+# KERNEL: 
+# KERNEL:   You are using a version of the UVM library that has been compiled
+# KERNEL:   with `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR undefined.
+# KERNEL:   See http://www.eda.org/svdb/view.php?id=3770 for more details.
+# KERNEL: 
+# KERNEL:       (Specify +UVM_NO_RELNOTES to turn off this notice)
+# KERNEL: 
+# KERNEL: ASDB file was created in location /home/runner/dataset.asdb
+# KERNEL: UVM_INFO @ 0: reporter [RNTST] Running test test...
+# KERNEL: RAM_depth=8
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @5 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @10 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @15 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @20 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @25 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @30 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @35 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @40 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @45 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @50 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @55 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @60 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @65 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @70 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @75 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @80 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @85 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @90 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @95 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @100 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @105 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @110 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @115 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @120 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @125 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @130 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @135 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @140 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @145 clk pulse Input and Output Matched
+# KERNEL: Compare SUCCESSFULLY
+# KERNEL: @150 clk pulse Input and Output Matched
+# KERNEL: UVM_INFO /home/build/vlib1/vlib/uvm-1.2/src/base/uvm_objection.svh(1271) @ 150: reporter [TEST_DONE] 'run' phase is ready to proceed to the 'extract' phase
+# KERNEL: UVM_INFO /home/build/vlib1/vlib/uvm-1.2/src/base/uvm_root.svh(583) @ 150: reporter [UVMTOP] UVM testbench topology:
+# KERNEL: ------------------------------------------------------------------
+# KERNEL: Name                       Type                        Size  Value
+# KERNEL: ------------------------------------------------------------------
+# KERNEL: uvm_test_top               test                        -     @336 
+# KERNEL:   env                      environment                 -     @353 
+# KERNEL:     agent1                 agnt                        -     @367 
+# KERNEL:       ap                   uvm_analysis_port           -     @376 
+# KERNEL:       driver               drvr                        -     @807 
+# KERNEL:         rsp_port           uvm_analysis_port           -     @826 
+# KERNEL:         seq_item_port      uvm_seq_item_pull_port      -     @816 
+# KERNEL:       monitor1             ipmon                       -     @836 
+# KERNEL:         analysis_port      uvm_analysis_port           -     @846 
+# KERNEL:       sequencer            seqncr                      -     @670 
+# KERNEL:         rsp_export         uvm_analysis_export         -     @679 
+# KERNEL:         seq_item_export    uvm_seq_item_pull_imp       -     @797 
+# KERNEL:         arbitration_queue  array                       0     -    
+# KERNEL:         lock_queue         array                       0     -    
+# KERNEL:         num_last_reqs      integral                    32    'd1  
+# KERNEL:         num_last_rsps      integral                    32    'd1  
+# KERNEL:     agent2                 slave_agent                 -     @386 
+# KERNEL:       ap                   uvm_analysis_port           -     @395 
+# KERNEL:       driver2              drvr2                       -     @1001
+# KERNEL:         rsp_port           uvm_analysis_port           -     @1020
+# KERNEL:         seq_item_port      uvm_seq_item_pull_port      -     @1010
+# KERNEL:       monitor2             opmon                       -     @1030
+# KERNEL:         analysis_port      uvm_analysis_port           -     @1039
+# KERNEL:       sequencer2           seqncr2                     -     @864 
+# KERNEL:         rsp_export         uvm_analysis_export         -     @873 
+# KERNEL:         seq_item_export    uvm_seq_item_pull_imp       -     @991 
+# KERNEL:         arbitration_queue  array                       0     -    
+# KERNEL:         lock_queue         array                       0     -    
+# KERNEL:         num_last_reqs      integral                    32    'd1  
+# KERNEL:         num_last_rsps      integral                    32    'd1  
+# KERNEL:     agt_1_scb_fifo         uvm_tlm_analysis_fifo #(T)  -     @414 
+# KERNEL:       analysis_export      uvm_analysis_imp            -     @463 
+# KERNEL:       get_ap               uvm_analysis_port           -     @453 
+# KERNEL:       get_peek_export      uvm_get_peek_imp            -     @433 
+# KERNEL:       put_ap               uvm_analysis_port           -     @443 
+# KERNEL:       put_export           uvm_put_imp                 -     @423 
+# KERNEL:     agt_2_scb_fifo         uvm_tlm_analysis_fifo #(T)  -     @473 
+# KERNEL:       analysis_export      uvm_analysis_imp            -     @522 
+# KERNEL:       get_ap               uvm_analysis_port           -     @512 
+# KERNEL:       get_peek_export      uvm_get_peek_imp            -     @492 
+# KERNEL:       put_ap               uvm_analysis_port           -     @502 
+# KERNEL:       put_export           uvm_put_imp                 -     @482 
+# KERNEL:     scb                    scoreboard                  -     @405 
+# KERNEL:       act_port             uvm_blocking_get_port       -     @1067
+# KERNEL:       exp_port             uvm_blocking_get_port       -     @1057
+# KERNEL:     v_sequencer            virtual_sequencer           -     @532 
+# KERNEL:       rsp_export           uvm_analysis_export         -     @541 
+# KERNEL:       seq_item_export      uvm_seq_item_pull_imp       -     @659 
+# KERNEL:       arbitration_queue    array                       0     -    
+# KERNEL:       lock_queue           array                       0     -    
+# KERNEL:       num_last_reqs        integral                    32    'd1  
+# KERNEL:       num_last_rsps        integral                    32    'd1  
+# KERNEL: ------------------------------------------------------------------
+# KERNEL: 
+# KERNEL: UVM_INFO /home/build/vlib1/vlib/uvm-1.2/src/base/uvm_report_server.svh(869) @ 150: reporter [UVM/REPORT/SERVER] 
+# KERNEL: --- UVM Report Summary ---
+# KERNEL: 
+# KERNEL: ** Report counts by severity
+# KERNEL: UVM_INFO :    4
+# KERNEL: UVM_WARNING :    0
+# KERNEL: UVM_ERROR :    0
+# KERNEL: UVM_FATAL :    0
+# KERNEL: ** Report counts by id
+# KERNEL: [RNTST]     1
+# KERNEL: [TEST_DONE]     1
+# KERNEL: [UVM/RELNOTES]     1
+# KERNEL: [UVMTOP]     1
+# KERNEL: 
+# RUNTIME: Info: RUNTIME_0068 uvm_root.svh (521): $finish called.
+# KERNEL: Time: 150 ns,  Iteration: 66,  Instance: /top,  Process: @INITIAL#35_2@.
+# KERNEL: stopped at time: 150 ns
+# VSIM: Simulation has finished. There are no more test vectors to simulate.
+# VSIM: Simulation has finished.
+Done
