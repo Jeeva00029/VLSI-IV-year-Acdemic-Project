@@ -1,0 +1,632 @@
+"Design code(DUT)"
+// Code your design here
+module syn_fifo (
+clk      , // Clock input
+rst      , // Active high reset
+wr_cs    , // Write chip select
+rd_cs    , // Read chipe select
+data_in  , // Data input
+rd_en    , // Read enable
+wr_en    , // Write Enable
+data_out , // Data Output
+empty    , // FIFO empty
+full       // FIFO full
+);    
+ 
+// FIFO constants
+parameter DATA_WIDTH = 8;
+parameter ADDR_WIDTH = 3;
+  parameter RAM_DEPTH = (1 <<< ADDR_WIDTH);
+// Port Declarations
+input clk ;
+input rst ;
+input wr_cs ;
+input rd_cs ;
+input rd_en ;
+input wr_en ;
+input [DATA_WIDTH-1:0] data_in ;
+output full ;
+output empty ;
+output [DATA_WIDTH-1:0] data_out ;
+
+//-----------Internal variables-------------------
+reg [ADDR_WIDTH-1:0] wr_pointer;
+reg [ADDR_WIDTH-1:0] rd_pointer;
+reg [ADDR_WIDTH :0] status_cnt;
+reg [DATA_WIDTH-1:0] data_out ;
+    reg ram_data[ADDR_WIDTH-1:0];
+  reg [DATA_WIDTH-1:0] data_ram [RAM_DEPTH];
+
+
+//-----------Variable assignments---------------
+assign full = (status_cnt == (RAM_DEPTH-1));
+assign empty = (status_cnt == 0);
+
+//-----------Code Start---------------------------
+always @ (posedge clk or posedge rst)
+begin : WRITE_POINTER
+  if (rst==1) begin
+    wr_pointer <= 0;
+    $display("RAM_depth=%d",RAM_DEPTH);
+  end else if (wr_cs && wr_en ) begin
+    wr_pointer <= wr_pointer + 1;
+  end
+end
+  
+  always @ (posedge clk or posedge rst)
+    begin: WRITE_DATA
+      if(rst==1) begin
+        data_ram[ADDR_WIDTH]<=0;
+      end
+      else begin if(wr_cs && wr_en) begin
+        data_ram[wr_pointer] <= data_in;
+        
+      end
+      end
+    end
+
+always @ (posedge clk or posedge rst)
+begin : READ_POINTER
+  if (rst==1) begin
+    rd_pointer <= 0;
+  end else if (rd_cs && rd_en ) begin
+    rd_pointer <= rd_pointer + 1;
+  end
+end
+
+always  @ (posedge clk or posedge rst)
+begin : READ_DATA
+  if (rst==1) begin
+    data_out <= 0;
+  end else if (rd_cs && rd_en ) begin
+    data_out <= data_ram[rd_pointer];
+   
+  end
+end
+
+always @ (posedge clk or posedge rst)
+begin : STATUS_COUNTER
+  if (rst==1) begin
+    status_cnt <= 0;
+  // Read but no write.
+  end else if ((rd_cs && rd_en) && !(wr_cs && wr_en) 
+                && (status_cnt != 0)) begin
+    status_cnt <= status_cnt - 1;
+  // Write but no read.
+  end else if ((wr_cs && wr_en) && !(rd_cs && rd_en) 
+               && (status_cnt != RAM_DEPTH)) begin
+    status_cnt <= status_cnt + 1;
+  end
+end
+endmodule
+
+"testbench"
+// Code your testbench here
+// or browse Examples
+`include "uvm_macros.svh"
+import uvm_pkg::*;
+//`timescale 1ns/10ps
+`include "seq_items.sv"
+`include "sequence.sv"
+
+`include "sequencer.sv"
+`include "sequencer2.sv"
+`include "driver.sv"
+`include "driver2.sv"
+`include "ipmon.sv"
+`include "interface.sv"
+`include "scoreboard.sv"
+`include "magent.sv"
+`include "opmon.sv"
+`include "sagent.sv"
+`include "virtual_sequencer.sv"
+`include "environment.sv"
+`include "virtual_sequence.sv"
+
+`include "test.sv"
+module top;
+  bit clk;
+  bit rst;
+  mem_if vif(clk,rst);
+  syn_fifo  DUT(.clk(vif.clk),.rst(vif.rst),.data_in(vif.data_in),    .data_out(vif.data_out),.wr_cs(vif.wr_cs),.wr_en(vif.wr_en),.rd_cs(vif.rd_cs),.rd_en(vif.rd_en),.full(vif.full),.empty(vif.empty));
+  always #5 clk=~clk;
+  initial begin
+    clk=1;
+    rst=1;
+    #10 rst=0;
+    #500; //rst=0;
+    //#10;
+    $finish;
+  end
+  initial begin
+    run_test();
+  end
+  initial begin
+    uvm_config_db #(virtual mem_if)::set(null,"*","mem_if",vif);
+  end
+  initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars();
+  end
+endmodule
+
+"environment"
+class environment extends uvm_env;
+  `uvm_component_utils(environment)
+  agnt agent1;
+  slave_agent agent2;
+  scoreboard scb;
+  virtual_sequencer v_sequencer;//intantiating the vs
+  uvm_tlm_analysis_fifo #(packet) agt_1_scb_fifo;
+  uvm_tlm_analysis_fifo #(packet) agt_2_scb_fifo;
+  function new(string name="environment",uvm_component parent);
+    super.new(name,parent);
+  endfunction
+  extern virtual function void build_phase(uvm_phase phase);
+  extern virtual function void connect_phase(uvm_phase phase);
+    endclass
+    function void environment::build_phase(uvm_phase phase);
+      super.build_phase(phase);
+      agent1=agnt::type_id::create("agent1",this);
+      agent2=slave_agent::type_id::create("agent2",this);
+      scb=scoreboard::type_id::create("scb",this);
+      agt_1_scb_fifo = new("agt_1_scb_fifo", this);
+	  agt_2_scb_fifo = new("agt_2_scb_fifo", this);
+      v_sequencer=virtual_sequencer::type_id::create("v_sequencer",this);
+    endfunction
+    function void environment::connect_phase(uvm_phase phase);
+      super.connect_phase(phase);
+      agent1.ap.connect(agt_1_scb_fifo.analysis_export);
+      agent2.ap.connect(agt_2_scb_fifo.analysis_export);
+      scb.exp_port.connect(agt_1_scb_fifo.blocking_get_export);
+      scb.act_port.connect(agt_2_scb_fifo.blocking_get_export);
+      v_sequencer.sequencer=agent1.sequencer;//v_sequencer is handle of the vs
+      v_sequencer.sequencer2=agent2.sequencer2;
+     // agent1.ap.connect(scb.agnt1_in);
+      //agent2.ap.connect(scb.agnt2_out);
+    endfunction
+      
+"interface"
+interface mem_if(input logic clk,rst);
+  logic [7:0]data_in;
+  logic [7:0]data_out;
+  logic wr_cs;
+  logic wr_en;
+  logic rd_cs;
+  logic rd_en;
+  logic full;
+  logic empty;
+ endinterface
+
+"sequence-items"
+class packet extends uvm_sequence_item;
+  rand logic [7:0] data_in;
+  logic [7:0] data_out;
+ rand bit wr_en;
+ rand bit rd_en;
+ rand bit wr_cs;
+ rand bit rd_cs;
+  bit full;
+  bit empty;
+  `uvm_object_utils_begin(packet)
+  `uvm_field_int(data_in,UVM_ALL_ON)
+  `uvm_field_int(data_out,UVM_ALL_ON)
+  `uvm_field_int(wr_en,UVM_ALL_ON)
+  `uvm_field_int(wr_cs,UVM_ALL_ON)
+  `uvm_field_int(rd_en,UVM_ALL_ON)
+  `uvm_field_int(rd_cs,UVM_ALL_ON)
+  //`uvm_field_int(full,UVM_ALL_ON)
+  //`uvm_field_int(empty,UVM_ALL_ON)
+  `uvm_object_utils_end 
+  function new(string name="packet");
+    super.new(name);
+  endfunction
+  
+endclass
+
+"virtual sequence"
+class vir_seq extends uvm_sequence#(packet);
+  `uvm_object_utils(vir_seq)
+  `uvm_declare_p_sequencer (virtual_sequencer)
+  function new(string name="vir_seq");
+    super.new(name);
+  endfunction
+  //seqncr sequencer;
+  //seqncr2 sequencer2;
+  wr_seq write_seq;
+  rd_seq read_seq;
+  virtual task pre_body();
+   write_seq=wr_seq::type_id::create("write_seq");
+   read_seq=rd_seq::type_id::create("read_seq");
+  endtask
+   // fork
+  task body();
+    write_seq.start(p_sequencer.sequencer);// (or) `uvm_do_on_with(write_seq,p_sequencer.sequencer,{wr_cs==1;wr_en==1;})
+    #10;
+    read_seq.start(p_sequencer.sequencer2);// (or) `uvm_do_on(read_seq,p_sequencer.sequencer2)
+    //join
+  endtask
+endclass
+
+"virtual sequencer"
+class virtual_sequencer extends uvm_sequencer;
+  `uvm_component_utils(virtual_sequencer)
+  function new(string name="virtual_sequencer",uvm_component parent);
+  super.new(name,parent);
+  endfunction
+  seqncr sequencer;
+  seqncr2 sequencer2;
+endclass
+  
+"scoreboard"
+class scoreboard extends uvm_scoreboard;
+ 	`uvm_component_utils(scoreboard)
+
+  uvm_blocking_get_port #(packet) exp_port;
+  uvm_blocking_get_port #(packet) act_port;	
+  /*`uvm_analysis_imp_decl(_inp)
+  `uvm_analysis_imp_decl(_outp)
+  uvm_analysis_imp_inp #(packet,scoreboard) agnt1_in;
+  uvm_analysis_imp_outp #(packet,scoreboard) agnt2_out;*/
+  packet in[$];
+  packet out[$];
+	bit result;
+	
+	function new(string name, uvm_component parent);
+		super.new(name, parent);
+      in={};
+      out={};
+	endfunction	
+	
+	function void build_phase(uvm_phase phase);
+		super.build_phase(phase);
+     // agnt1_in=new("agnt1_in",this);
+      //agnt2_out=new("agnt2_out",this);
+		exp_port = new("exp_port", this);
+		act_port = new("act_port", this);		
+	endfunction
+	packet item1;
+  packet item2;
+	task run_phase(uvm_phase phase);
+		forever
+		begin
+          item1=new();
+          item2=new();
+          #10;
+          exp_port.get(item1);
+          act_port.get(item2);
+          result = (item1.data_in==item2.data_out);
+			if (result)
+				$display("Compare SUCCESSFULLY");
+			else
+              `uvm_error("WARNING", "Compare FAILED")
+              $display("The expected data is %0hx",item1);
+          //item1.print();
+          $display("The actual data is %0hx",item2);
+          //item2.print();	
+		end
+    endtask
+endclass
+
+"sequence"
+class seq extends uvm_sequence#(packet);
+  `uvm_object_utils(seq)
+  function new(string name="seq");
+    super.new(name);
+  endfunction
+endclass
+class wr_seq extends uvm_sequence#(packet);
+  `uvm_object_utils(wr_seq)
+  function new(string name="wr_seq");
+    super.new(name);
+  endfunction
+  virtual task body();
+  /*req=packet::type_id::create("req");
+  wait_for_grant();
+  assert(req.randomize());
+  send_request(req);
+  wait_for_item_done();*/
+  repeat(5)
+    begin
+      `uvm_do_with(req,{wr_cs==1;wr_en==1;rd_cs==0;rd_en==0;})
+      #10;
+    end
+  endtask
+endclass
+class rd_seq extends uvm_sequence#(packet);
+  `uvm_object_utils(rd_seq)
+  function new(string name="rd_seq");
+     super.new(name);
+   endfunction    
+ virtual task body();
+      repeat(5)
+    begin
+      `uvm_do_with(req,{wr_cs==0;wr_en==0;rd_cs==1;rd_en==1;})
+      #10;
+    end
+   endtask
+endclass
+
+"master-agent"
+class agnt extends uvm_agent;
+  `uvm_component_utils(agnt)
+  drvr driver;
+  seqncr sequencer;
+  ipmon monitor1;
+  uvm_analysis_port #(packet) ap;
+  function new (string name="agnt",uvm_component parent);
+	super.new(name,parent);
+    ap=new("ap",this);
+endfunction
+extern virtual function void build_phase(uvm_phase phase);
+extern virtual function void connect_phase(uvm_phase phase);
+endclass
+  function void agnt::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    //if(is_active==UVM_ACTIVE)begin
+    sequencer=seqncr::type_id::create("sequencer",this);
+    driver=drvr::type_id::create("driver",this);
+    monitor1=ipmon::type_id::create("monitor1",this);
+  endfunction
+  function void agnt::connect_phase(uvm_phase phase);
+    super.connect_phase(phase);
+    //if(is_active==UVM_ACTIVE)begin
+      driver.seq_item_port.connect(sequencer.seq_item_export);
+    monitor1.analysis_port.connect(this.ap);
+  endfunction
+    
+"master-sequencer"
+class seqncr extends uvm_sequencer#(packet);
+  `uvm_component_utils(seqncr)
+  function new(string name="seqncr",uvm_component parent);
+    super.new(name,parent);
+  endfunction
+endclass
+    
+"master-driver"
+class drvr extends uvm_driver#(packet);
+  `uvm_component_utils(drvr)
+  virtual mem_if vif;
+  function new(string name="drvr",uvm_component parent);
+    super.new(name,parent);
+  endfunction
+extern virtual function void build_phase(uvm_phase phase);
+extern virtual task run_phase(uvm_phase phase);
+  extern task drive();
+    endclass
+  function void drvr::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    if(!uvm_config_db #(virtual mem_if)::get(this,"","mem_if",vif))
+    `uvm_fatal("no_vif",{"virtual interface must be set for:",get_full_name(),"vif"});
+  endfunction
+  task drvr::run_phase(uvm_phase phase);
+    forever begin
+      #5;
+      seq_item_port.get_next_item(req);
+      drive();
+      seq_item_port.item_done();
+    end
+  endtask
+   task drvr::drive();
+    vif.data_in=req.data_in;
+     vif.wr_cs=req.wr_cs;
+     vif.rd_cs=req.rd_cs;
+     vif.wr_en=req.wr_en;
+     vif.rd_en=req.rd_en;
+      endtask
+
+"monitor"
+class ipmon extends uvm_monitor;
+  `uvm_component_utils(ipmon)
+  uvm_analysis_port#(packet) analysis_port;
+  packet pkt;
+  function new(string name="ipmon",uvm_component parent);
+    super.new(name,parent);
+    pkt=new();
+    analysis_port=new("analysis_port",this);
+    endfunction
+  virtual mem_if vif;
+  extern function void build_phase(uvm_phase phase);
+  extern task run_phase(uvm_phase phase);
+  endclass
+    function void ipmon::build_phase(uvm_phase phase);
+      super.build_phase(phase);
+      //analysis_port=new("analysis_port",this);
+      if(!uvm_config_db #(virtual mem_if)::get(this,"","mem_if",vif))
+        $display("monitor uvm_config_db get failed");
+    endfunction
+    task ipmon::run_phase(uvm_phase phase);
+      forever begin
+        #5;
+       // @(posedge vif.clk)
+        if((vif.rst==0) && (vif.wr_cs==1) && (vif.wr_en==1))
+        pkt.data_in=vif.data_in;
+       analysis_port.write(pkt);
+      end
+    endtask
+    
+        
+"monitor"
+class opmon extends uvm_monitor;
+  `uvm_component_utils(opmon)
+  virtual mem_if vif;
+  uvm_analysis_port #(packet) analysis_port;
+  packet pkt;
+  function new (string name="opmon",uvm_component parent);
+	super.new(name,parent);
+    analysis_port=new("analysis_port",this);
+    pkt=new();
+endfunction
+  extern virtual task run_phase(uvm_phase phase);
+extern virtual function void build_phase(uvm_phase phase);
+endclass 
+  function void opmon::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    if (!uvm_config_db#(virtual mem_if)::get(get_parent(), "", "mem_if", vif)) begin
+          `uvm_fatal("VIF_ERR","Monitor DUT interface not set")
+         end
+  endfunction
+  task opmon::run_phase(uvm_phase phase);
+    forever begin
+      #5;
+      //@(posedge vif.clk)
+      if ((vif.rst==0) && (vif.rd_cs==1) && (vif.rd_en==1))
+     pkt.data_out=vif.data_out;
+     // pkt.din=pkt.din;
+     analysis_port.write(pkt);
+    end
+  endtask
+
+"slave-agent"
+class slave_agent extends uvm_agent;
+  `uvm_component_utils(slave_agent)
+  drvr2 driver2;
+  seqncr2 sequencer2;
+  opmon monitor2;
+  uvm_analysis_port#(packet) ap;
+  function new(string name="slave_agent",uvm_component parent);
+    super.new(name,parent);
+     ap=new("ap",this);
+  endfunction
+  extern virtual function void build_phase(uvm_phase phase);
+extern virtual function void connect_phase(uvm_phase phase);
+endclass
+  function void slave_agent::build_phase(uvm_phase phase);
+    super.build_phase (phase);
+    sequencer2=seqncr2::type_id::create("sequencer2",this);
+    driver2=drvr2::type_id::create("driver2",this);
+    monitor2=opmon::type_id::create("monitor2",this);
+  endfunction
+  function void slave_agent::connect_phase(uvm_phase phase);
+    super.connect_phase(phase);
+    driver2.seq_item_port.connect(sequencer2.seq_item_export);
+    monitor2.analysis_port.connect(this.ap);
+  endfunction
+    
+    
+"slave-sequencer"
+class seqncr2 extends uvm_sequencer#(packet);
+  `uvm_component_utils(seqncr2)
+  function new(string name="seqncr2",uvm_component parent);
+    super.new(name,parent);
+  endfunction
+endclass
+
+"slave-driver"
+class drvr2 extends uvm_driver#(packet);
+  `uvm_component_utils(drvr2)
+  virtual mem_if vif;
+  function new(string name="drvr2",uvm_component parent);
+    super.new(name,parent);
+  endfunction
+extern virtual function void build_phase(uvm_phase phase);
+extern virtual task run_phase(uvm_phase phase);
+  extern task drive2();
+    endclass
+  function void drvr2::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    if(!uvm_config_db #(virtual mem_if)::get(this,"","mem_if",vif))
+    `uvm_fatal("no_vif",{"virtual interface must be set for:",get_full_name(),"vif"});
+  endfunction
+  task drvr2::run_phase(uvm_phase phase);
+    forever begin
+      #5;
+      seq_item_port.get_next_item(req);
+      drive2();
+      seq_item_port.item_done();
+    end
+  endtask
+   task drvr2::drive2();
+    vif.data_in=req.data_in;
+     vif.wr_cs=req.wr_cs;
+     vif.rd_cs=req.rd_cs;
+     vif.wr_en=req.wr_en;
+     vif.rd_en=req.rd_en;
+      endtask
+
+"uvm-test-phase"
+class test extends uvm_test;
+  `uvm_component_utils(test)
+  environment env;
+  vir_seq seqnce;//instantiating the vs
+
+  function new(string name="test",uvm_component parent);
+    super.new(name,parent);
+  endfunction
+  virtual function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    env=environment::type_id::create("env",this);
+    seqnce=vir_seq::type_id::create("seqnce",this);//creating object
+    
+  endfunction
+  
+    task run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+    seqnce.start(env.v_sequencer);//virtual sequence will start
+    phase.drop_objection(this);
+  endtask : run_phase
+  virtual function void final_phase(uvm_phase phase);
+    super.final_phase(phase);
+    uvm_top.print_topology();
+  endfunction
+endclass
+  
+"output"
+RAM_depth=          8
+RAM_depth=          8
+UVM_ERROR scoreboard.sv(41) @ 10: uvm_test_top.env.scb [WARNING] Compare FAILED
+The expected data is ef026fb0x
+The actual data is ef02d118x
+UVM_ERROR scoreboard.sv(41) @ 20: uvm_test_top.env.scb [WARNING] Compare FAILED
+The expected data is ef026fb0x
+The actual data is ef02d118x
+UVM_ERROR scoreboard.sv(41) @ 30: uvm_test_top.env.scb [WARNING] Compare FAILED
+The expected data is ef026fb0x
+The actual data is ef02d118x
+UVM_ERROR scoreboard.sv(41) @ 40: uvm_test_top.env.scb [WARNING] Compare FAILED
+The expected data is ef026fb0x
+The actual data is ef02d118x
+UVM_ERROR scoreboard.sv(41) @ 50: uvm_test_top.env.scb [WARNING] Compare FAILED
+The expected data is ef026fb0x
+The actual data is ef02d118x
+UVM_ERROR scoreboard.sv(41) @ 60: uvm_test_top.env.scb [WARNING] Compare FAILED
+The expected data is ef026fb0x
+The actual data is ef02d118x
+UVM_ERROR scoreboard.sv(41) @ 70: uvm_test_top.env.scb [WARNING] Compare FAILED
+The expected data is ef026fb0x
+The actual data is ef02d118x
+UVM_ERROR scoreboard.sv(41) @ 80: uvm_test_top.env.scb [WARNING] Compare FAILED
+The expected data is ef026fb0x
+The actual data is ef02d118x
+UVM_ERROR scoreboard.sv(41) @ 90: uvm_test_top.env.scb [WARNING] Compare FAILED
+The expected data is ef026fb0x
+The actual data is ef02d118x
+UVM_ERROR scoreboard.sv(41) @ 100: uvm_test_top.env.scb [WARNING] Compare FAILED
+The expected data is ef026fb0x
+The actual data is ef02d118x
+UVM_ERROR scoreboard.sv(41) @ 110: uvm_test_top.env.scb [WARNING] Compare FAILED
+The expected data is ef026fb0x
+The actual data is ef02d118x
+UVM_INFO /apps/vcsmx/vcs/S-2021.09//etc/uvm-1.2/src/base/uvm_objection.svh(1276) @ 115: reporter [TEST_DONE] 'run' phase is ready to proceed to the 'extract' phase
+
+"report summary"
+--- UVM Report Summary ---
+
+** Report counts by severity
+UVM_INFO :    4
+UVM_WARNING :    0
+UVM_ERROR :   11
+UVM_FATAL :    0
+** Report counts by id
+[RNTST]     1
+[TEST_DONE]     1
+[UVM/RELNOTES]     1
+[UVMTOP]     1
+[WARNING]    11
+
+"this is my updated project code with using master-slave concept to verify a fifo memory module using virtual sequence and sequencer approch 2 method
+. in my code has output all input has mismatched and causing 11 errors and to improve code has to fifo full functionality and empty functionality and make me a code 
+has nill error and Compare successfull popup. make a code as right that above condition."
+
+
+
